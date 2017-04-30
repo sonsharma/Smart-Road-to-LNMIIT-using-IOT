@@ -1,0 +1,32 @@
+#!/bin/bash
+echo  -n "enter the sensortag from which you want to take the value:"
+read m
+if [[ m -eq "1" ]];
+then
+	echo  -n "do you want light(1) or temp(2) values: "
+	read o1
+	if [[ o1 -eq "1" ]];
+	then
+		python lux.py B0:B4:48:BE:C7:02
+	elif [[ o1 -eq "2" ]];
+	then
+		python temp.py B0:B4:48:BE:C7:02
+	fi
+elif [[ m -eq "2" ]];then
+	echo  -n "do you want light(1) or temp(2) values:"
+	read o2
+	if [[ o2 -eq "1" ]];then
+		python lux.py B0:B4:48:CF:FB:02
+	elif [[ o2 -eq "2" ]] ;then
+		python temp.py B0:B4:48:CF:FB:02
+	fi
+elif [[ m -eq "3" ]];then
+	echo  -n "do you want light(1) or temp(2) values:"
+	read o3
+	if [[ o3 -eq "1" ]] ;then
+		python lux.py B0:B4:48:BF:92:06
+	elif [[ o3 -eq "2" ]] ;then
+		python temp.py B0:B4:48:BF:92:06
+	fi
+fi
+echo  -n "done"

@@ -1,0 +1,166 @@
+
+Conversation opened. 5 messages. All messages read.
+
+Skip to content
+Using Gmail with screen readers
+CollapseQuick Links
+Add Quick Link
+ExpandGoogle Calendar
+Move to Inbox
+ 
+More 
+15 of 1,371
+ 
+Code for turning on n off light
+Inbox
+	x
+Sonal Sharma <shreyamay2@gmail.com>
+	
+AttachmentsApr 24 (7 days ago)
+	
+to Deepika, PRACHI, kapil
+Attachments area
+Sonal Sharma <shreyamay2@gmail.com>
+	
+Apr 24 (7 days ago)
+	
+to Deepika, PRACHI, kapil
+Mene report me code kar dia hai ..list of figures bhi aa gye starting me,
+ek bar check karlo sab
+
+On Mon, Apr 24, 2017 at 11:11 AM, Sonal Sharma <shreyamay2@gmail.com> wrote:
+kapil matani		Apr 24 (7 days ago)
+What about you?
+kapil matani		Apr 24 (7 days ago)
+Sry, I mean video? What about video?
+Sonal Sharma <shreyamay2@gmail.com>
+#include <SoftwareSerial.h>
+#include "VoiceRecognitionV3.h"
+#include<Servo.h>
+
+/**        
+  Connection
+  Arduino    VoiceRecognitionModule
+   2   ------->     TX
+   3   ------->     RX
+*/
+VR myVR(2,3);    // 2:RX 3:TX, you can choose your favourite pins.
+uint8_t records[7]; // save record
+uint8_t buf[64];
+
+int light = 3;
+
+#define onRecord    (0)
+#define offRecord   (1) 
+
+/**
+  @brief   Print signature, if the character is invisible, 
+           print hexible value instead.
+  @param   buf     --> command length
+           len     --> number of parameters
+*/
+void printSignature(uint8_t *buf, int len)
+{
+  int i;
+  for(i=0; i<len; i++){
+    if(buf[i]>0x19 && buf[i]<0x7F){
+      Serial.write(buf[i]);
+    }
+    else{
+      Serial.print("[");
+      Serial.print(buf[i], HEX);
+      Serial.print("]");
+    }
+  }
+}
+
+/**
+  @brief   Print signature, if the character is invisible, 
+           print hexible value instead.
+  @param   buf  -->  VR module return value when voice is recognized.
+             buf[0]  -->  Group mode(FF: None Group, 0x8n: User, 0x0n:System
+             buf[1]  -->  number of record which is recognized. 
+             buf[2]  -->  Recognizer index(position) value of the recognized record.
+             buf[3]  -->  Signature length
+             buf[4]~buf[n] --> Signature
+*/
+void printVR(uint8_t *buf)
+{
+  Serial.println("VR Index\tGroup\tRecordNum\tSignature");
+
+  Serial.print(buf[2], DEC);
+  Serial.print("\t\t");
+
+  if(buf[0] == 0xFF){
+    Serial.print("NONE");
+  }
+  else if(buf[0]&0x80){
+    Serial.print("UG ");
+    Serial.print(buf[0]&(~0x80), DEC);
+  }
+  else{
+    Serial.print("SG ");
+    Serial.print(buf[0], DEC);
+  }
+  Serial.print("\t");
+
+  Serial.print(buf[1], DEC);
+  Serial.print("\t\t");
+  if(buf[3]>0){
+    printSignature(buf+4, buf[3]);
+  }
+  else{
+    Serial.print("NONE");
+  }
+  Serial.println("\r\n");
+}
+
+void setup()
+{
+  /** initialize */
+  myVR.begin(9600);
+  
+  Serial.begin(115200);
+  Serial.println("Electrohouse Voice Recognition V3 Module\r\nControl LED sample");
+  
+  pinMode(led1, OUTPUT);
+
+  if(myVR.clear() == 0){
+    Serial.println("Recognizer cleared.");
+  }else{
+    Serial.println("Not find VoiceRecognitionModule.");
+    Serial.println("Please check connection and restart Arduino.");
+    while(1);
+  }
+  
+  if(myVR.load((uint8_t)onRecord) >= 0){
+    Serial.println("onRecord loaded");
+  }
+  
+  if(myVR.load((uint8_t)offRecord) >= 0){
+    Serial.println("offRecord loaded");
+  }
+}
+
+void loop()
+{
+  int ret;
+  ret = myVR.recognize(buf, 50);
+  if(ret>0){
+    switch(buf[1]){
+      case onRecord:
+        /** turn on Light */
+        digitalWrite(light, HIGH);
+        break;
+      case offRecord:
+        /** turn off Light*/
+        digitalWrite(light, LOW);
+        break;
+      default:
+        Serial.println("Record function undefined");
+        break;
+    }
+    /** voice recognized */
+    printVR(buf);
+  }
+}

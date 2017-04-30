@@ -1,0 +1,11 @@
+#!/bin/bash
+echo -n "Ener the number of time you want to loop:"
+read n
+for((i=0;i<n;i++))
+do
+	python lux.py B0:B4:48:BE:C7:02 #|grep  -o '# .*'|
+#	tee  -a /home/pi/Lux_values/tag2.txt
+	python lux.py B0:B4:48:BF:92:06 #|grep  -o '# .*'|
+ #       tee  -a /home/pi/Lux_values/tag4.txt
+
+Done
